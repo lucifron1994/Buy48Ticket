@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Buy 48Ticket
 // @namespace    https://github.com/
-// @version      2.1
+// @version      2.2
 // @description  公演抢票
 // @author       lucifron
-// @match        http://shop.48.cn/tickets/item/*
+// @match        https://shop.48.cn/tickets/item/*
 // @grant        none
 // ==/UserScript==
 
@@ -77,6 +77,7 @@ $(function() {
             success: function (result) {
                 if (result.HasError) {
                     //失败操作
+                    console.info('Add失败 ' + result.Message);
                     layer.msg(result.Message);
                 }
                 else {
@@ -97,14 +98,13 @@ $(function() {
 
     function _timeCheck(){
         var currentTS = new Date().getTime();
-        var beijingTime = new Date("2016/12/21 20:00:00").getTime();
+        var beijingTime = new Date("2017/2/8 20:00:00").getTime();
 
-        // console.info(currentTS + '  ' + beijingTime);
-
+       // console.info(currentTS + '  ' + beijingTime);
         if (currentTS >= beijingTime) {
             init();
         }else{
-            setTimeout(function(){_timeCheck();},50);
+            setTimeout(function(){_timeCheck();},100);
         }
     }
 
