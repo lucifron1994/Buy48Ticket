@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Buy48Ticket
-// @namespace    https://github.com/lucifron1994/Buy48Ticket
-// @version      1.0
-// @description  Buy 48Ticket
+// @name         Buy 48Ticket
+// @namespace    https://github.com/
+// @version      2.1
+// @description  公演抢票
 // @author       lucifron
 // @match        https://shop.48.cn/tickets/item/*
 // @grant        none
@@ -10,27 +10,28 @@
 
 $(function() {
     'use strict';
-
     var _startTime = new Date().getTime();
-    console.info('开始脚本时间:' + _startTime);
+    var _dayNum = parseInt(_startTime / (3600 * 24 * 1000));
+    var _offset = -100; //时间差100ms
+    var _beijingTime = _dayNum * 3600 * 24 *1000 + 12 * 3600 * 1000 + _offset; //东8区，慢8小时
 
     var _num = 1;
     var _seattype = 2;  // 2V 3普 4站
+    var _repeatTime = 5000;
 
     var _addUrl = "/TOrder/add";
     var _id = location.pathname.split('/tickets/item/')[1];
 
-    var _beijingTime = 0;
 
     function _loop(){
-        setTimeout(function(){tickets();},5000);
+        setTimeout(function(){tickets();},_repeatTime);
     }
 
     function tickets(){
+        layer.msg('/TOrder/tickCheck');
 
         var __id =_id;
         var __checkUrl = "/TOrder/tickCheck";
-        layer.msg(__checkUrl);
 
         $.ajax({
             url: __checkUrl,
@@ -38,9 +39,9 @@ $(function() {
             dataType: "json",
             data: { id: __id,r: Math.random() },
             success: function (result) {
-                console.info(result.Message);
-                
                 if (result.HasError) {
+                    layer.msg(result.Message);
+                    console.info(result.Message);
                     _loop();
                 }
                 else
@@ -68,7 +69,7 @@ $(function() {
 
 
     function init(){
-        console.info('/TOrder/add');
+        console.info('调用 /TOrder/add');
 
         $.ajax({
             url: _addUrl,
@@ -77,7 +78,7 @@ $(function() {
             data: { id: _id, num: _num, seattype:_seattype, brand_id:$('body script').text().match(/brand_id:(\d+)/)[1], r: Math.random() },
             success: function (result) {
                 if (result.HasError) {
-                    console.info('/TOrder/add Failed' + result.Message);
+                    //失败操作
                     layer.msg(result.Message);
                 }
                 else {
@@ -91,41 +92,24 @@ $(function() {
                 }
             },
             error: function (e) {
-                layer.msg("/TOrder/add Error");
+                layer.msg("调用 /TOrder/add Error");
             }
         });
     }
 
     function _timeCheck(){
         var currentTS = new Date().getTime();
-        //console.info(currentTS + '  ' + _beijingTime);
+        
+        console.info(currentTS + '  ' + _beijingTime);
+
         if (currentTS >= _beijingTime) {
-            console.info('Current/Predict Time: ' + currentTS + '  ' + _beijingTime);
             init();
         }else{
-            setTimeout(function(){_timeCheck();},30);
+            setTimeout(function(){_timeCheck();},100);
         }
     }
 
-    function _prepareTime(){
-        var tyear = new Date().getFullYear();
-        var tmonth = new Date().getMonth() + 1;
-        var tday = new Date().getDate();
-        var str00 = tyear + '/' + tmonth + '/' + tday;
-        var date00 = new Date(str00);
-        var dateTime0 = date00.getTime();
-        
-        var timeofset = 200;
-        // Set offset by id
-        // if (_id==912){
-        //     timeofset = 600;
-        // }
-        var beijingTime = dateTime0 + 20*3600*1000 - timeofset;
-        _beijingTime = beijingTime;
-        _timeCheck();
-    }
+    _timeCheck();
 
-    _prepareTime();
-
-    console.info('Session Info: ' + _id);
+    console.info('购买信息：场次id ' + _id);
 });

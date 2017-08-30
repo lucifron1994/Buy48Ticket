@@ -11,7 +11,7 @@
 $(function() {
     'use strict';
 
-    console.info('开始JL脚本');
+    console.info('开始JS脚本');
 
     var _num = 1;
     var _seattype = 2;  // 2V 3普 4站
